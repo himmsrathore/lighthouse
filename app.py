@@ -6,7 +6,7 @@ from dhurandhar import dhurandhar_function
 import urllib.parse
 
 # Get query parameter
-query_params = st.experimental_get_query_params()
+query_params = st.query_params
 page = query_params.get("page", ["main"])[0].lower()
 
 # Set the page title based on the function
