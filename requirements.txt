@@ -5,6 +5,4 @@ requests
 opencv-python
 pytesseract
 Pillow
-
-
-
+nltk
