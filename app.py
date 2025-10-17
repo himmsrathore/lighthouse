@@ -7,26 +7,31 @@ from dhurandhar import dhurandhar_function
 # Set the page title
 st.title("Multi-Button Streamlit App")
 
-# Create a layout with four buttons
-st.header("Choose an Action")
+# Initialize session state for navigation
+if 'page' not in st.session_state:
+    st.session_state.page = 'main'
 
-# Create columns for better button layout (optional, for aesthetics)
-col1, col2 = st.columns(2)
+# Main page with buttons
+if st.session_state.page == 'main':
+    st.header("Choose an Action")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Whale"):
+            result = whale_function()
+            st.write(result)
+        if st.button("Hawk"):
+            result = hawk_function()
+            st.write(result)
+    with col2:
+        if st.button("Op"):
+            st.session_state.page = 'op_screen'
+        if st.button("Dhurandhar"):
+            result = dhurandhar_function()
+            st.write(result)
 
-with col1:
-    if st.button("Whale"):
-        result = whale_function()
-        st.write(result)
-
-    if st.button("Hawk"):
-        result = hawk_function()
-        st.write(result)
-
-with col2:
-    if st.button("Op"):
-        result = op_function()
-        st.write(result)
-
-    if st.button("Dhurandhar"):
-        result = dhurandhar_function()
-        st.write(result)
+# Op screen
+if st.session_state.page == 'op_screen':
+    st.title("Upload Option Greeks")
+    if st.button("Back"):
+        st.session_state.page = 'main'
+    op_function()
