@@ -2,8 +2,9 @@ streamlit
 pandas
 numpy
 requests
-streamlit
 opencv-python
 pytesseract
-numpy
 Pillow
+
+
+
