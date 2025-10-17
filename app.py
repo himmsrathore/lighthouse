@@ -3,43 +3,47 @@ from whale import whale_function
 from hawk import hawk_function
 from op import op_function
 from dhurandhar import dhurandhar_function
+import urllib.parse
 
-# Set the page title
-st.title("Multi-Button Streamlit App")
+# Get query parameter
+query_params = st.experimental_get_query_params()
+page = query_params.get("page", ["main"])[0].lower()
 
-# Initialize session state for navigation
-if 'page' not in st.session_state:
-    st.session_state.page = 'main'
+# Set the page title based on the function
+if page == "main":
+    st.title("Multi-Button Streamlit App")
+elif page == "whale":
+    st.title("Whale Function")
+elif page == "hawk":
+    st.title("Hawk Function")
+elif page == "op":
+    st.title("Op Function")
+elif page == "dhurandhar":
+    st.title("Dhurandhar Function")
 
-# Main page with buttons
-if st.session_state.page == 'main':
+# Main page with buttons to open new tabs
+if page == "main":
     st.header("Choose an Action")
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("Whale"):
-            result = whale_function()
-            st.write(result)
-        if st.button("Hawk"):
-            result = hawk_function()
-            st.write(result)
+        st.write("[Whale](?page=whale) (Open in new tab)")
+        st.write("[Hawk](?page=hawk) (Open in new tab)")
     with col2:
-        if st.button("Op"):
-            st.session_state.page = 'op_screen'
-        if st.button("Dhurandhar"):
-            result = dhurandhar_function()
-            st.write(result)
+        st.write("[Op](?page=op) (Open in new tab)")
+        st.write("[Dhurandhar](?page=dhurandhar) (Open in new tab)")
 
-# Op screen
-if st.session_state.page == 'op_screen':
-    st.title("Upload Option Greeks")
-    if st.button("Back"):
-        st.session_state.page = 'main'
-    op_function()
+    st.write("Click the links above to open each function in a new tab.")
 
-    # Hawk screen
-if st.session_state.page == 'hawk_screen':
-    st.title("News Sentiment Analysis (Hawk)")
-    if st.button("Back"):
-        st.session_state.page = 'main'
+# Render the appropriate function based on the page
+if page == "whale":
+    whale_function()
+elif page == "hawk":
     hawk_function()
-    
+elif page == "op":
+    op_function()
+elif page == "dhurandhar":
+    dhurandhar_function()
+
+# Add a back link to return to the main page
+if page != "main":
+    st.write("[Back to Main](?) (Open in new tab)")

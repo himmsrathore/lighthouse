@@ -18,21 +18,9 @@ def preprocess_text(text):
     return text.lower().strip()
 
 def hawk_function():
-    st.title("News Sentiment Analysis (Hawk)")
     st.write("Paste the news article or headline below to analyze sentiment and get a BUY/SELL/HOLD signal.")
-
-    # Initialize session state for news text and results
-    if 'news_text' not in st.session_state:
-        st.session_state.news_text = ""
-    if 'sentiment_result' not in st.session_state:
-        st.session_state.sentiment_result = None
-
-    # Text area with persisted input
-    news_input = st.text_area("Enter News Text", value=st.session_state.news_text, height=200, 
+    news_input = st.text_area("Enter News Text", height=200, 
                               placeholder="Paste your news here, e.g., 'Tesla reports record profits amid EV boom...'")
-
-    # Update session state with the latest input
-    st.session_state.news_text = news_input
 
     if st.button("Analyze Sentiment"):
         if news_input:
@@ -68,21 +56,7 @@ def hawk_function():
                 signal = "🟡 HOLD"
                 explanation = "Neutral sentiment – no clear directional signal from the news."
 
-            # Store result in session state
-            st.session_state.sentiment_result = {
-                "signal": signal,
-                "explanation": explanation,
-                "sentiment": sentiment
-            }
+            st.write(f"**Recommendation: {signal}**")
+            st.write(explanation)
         else:
-            st.session_state.sentiment_result = None
             st.write("Please paste some news text to analyze.")
-
-    # Display persisted result if available
-    if st.session_state.sentiment_result:
-        st.write(f"**Recommendation: {st.session_state.sentiment_result['signal']}**")
-        st.write(st.session_state.sentiment_result['explanation'])
-
-    if st.button("Back"):
-        st.session_state.page = 'main'
-        st.experimental_rerun()  # Force app rerun to return to main page
