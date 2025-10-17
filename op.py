@@ -3,24 +3,14 @@ import cv2
 import pytesseract
 import numpy as np
 from PIL import Image
+import pandas as pd
 
 def extract_greeks(image):
-    # Convert PIL image to OpenCV format
     img_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-    # Debugging: Display original image
-    st.image(img_cv, caption="Original Image (Debug)", channels="BGR", use_column_width=True)
-    
-    # Preprocessing
     gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
-    # Apply adaptive thresholding for better text detection
     thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
-    # Debugging: Display thresholded image
-    st.image(thresh, caption="Thresholded Image (Debug)", use_column_width=True)
-    
-    # Extract text using OCR
     text = pytesseract.image_to_string(thresh).lower()
     st.write("Extracted Text (Debug):", text)  # Debugging output
-    
     greeks = {}
     lines = text.split('\n')
     for line in lines:
@@ -94,20 +84,50 @@ def op_function():
         st.write("Call Option Recommendation:", call_rec)
         st.write("Put Option Recommendation:", put_rec)
 
-    # Suggestions and Table
+    # Suggestions
     st.write("### Suggestions")
-    st.write("1. Monitor Delta closely: A Delta above 0.3 (Call) or below -0.3 (Put) indicates strong directional movement.")
+    st.write("1. Monitor Delta closely: A Delta above 0.3 indicates strong upward movement for Calls.")
     st.write("2. Watch Theta: Values closer to 0 or slightly negative (-0.5 or better) suggest slower time decay.")
     st.write("3. Use Vega to assess volatility: Higher Vega (above 0.2) is favorable in volatile markets.")
-    st.write("4. Cross-check with Impvol: Low implied volatility might signal undervaluation, while high values suggest overvaluation.")
+    st.write("4. Cross-check with Impvol: Low implied volatility (< 0.7) might signal undervaluation.")
 
-    # Table of Good and Not-So-Good Ranges
-    st.write("### Option Buying Range Analysis")
-    import pandas as pd
+    # Table of Perfect Ranges for Call Options with Color Bars
+    st.write("### Perfect Range Analysis for Call Options")
     data = {
-        "Greek": ["Delta (Call)", "Delta (Put)", "Theta", "Vega", "Impvol"],
-        "Good Range": ["> 0.3", "< -0.3", "> -0.5", "> 0.2", "< 0.7"],
-        "Not-So-Good Range": ["< 0.3", "> -0.3", "< -0.5", "< 0.2", "> 0.7"]
+        "Greek": ["Delta", "Theta", "Vega", "Impvol"],
+        "Perfect Range": ["> 0.3", "> -0.5", "> 0.2", "< 0.7"],
+        "Value": [0.0, 0.0, 0.0, 0.0]  # Placeholder, will be updated with input if available
     }
     df = pd.DataFrame(data)
-    st.table(df)
+
+    # Update values if manual input is analyzed
+    if 'manual_greeks' in locals():
+        df.loc[df["Greek"] == "Delta", "Value"] = manual_greeks.get('delta', 0.0)
+        df.loc[df["Greek"] == "Theta", "Value"] = manual_greeks.get('theta', 0.0)
+        df.loc[df["Greek"] == "Vega", "Value"] = manual_greeks.get('vega', 0.0)
+        df.loc[df["Greek"] == "Impvol", "Value"] = manual_greeks.get('impvol', 0.0)
+    elif greeks:  # Update with extracted values if image is processed
+        df.loc[df["Greek"] == "Delta", "Value"] = greeks.get('delta', 0.0)
+        df.loc[df["Greek"] == "Theta", "Value"] = greeks.get('theta', 0.0)
+        df.loc[df["Greek"] == "Vega", "Value"] = greeks.get('vega', 0.0)
+        df.loc[df["Greek"] == "Impvol", "Value"] = greeks.get('impvol', 0.0)
+
+    # Define color conditions for bars
+    def get_bar_color(value, greek):
+        if greek == "Delta" and value > 0.3:
+            return "green"
+        elif greek == "Theta" and value > -0.5:
+            return "green"
+        elif greek == "Vega" and value > 0.2:
+            return "green"
+        elif greek == "Impvol" and value < 0.7:
+            return "green"
+        elif (greek == "Delta" and 0.2 <= value <= 0.3) or (greek == "Theta" and -0.7 <= value <= -0.5) or \
+             (greek == "Vega" and 0.1 <= value <= 0.2) or (greek == "Impvol" and 0.7 <= value <= 0.9):
+            return "orange"
+        else:
+            return "red"
+
+    # Add colored bars to the table
+    df["Bar"] = df.apply(lambda row: f'<span style="display:inline-block; width: 100px; height: 20px; background-color: {get_bar_color(row["Value"], row["Greek"])};"></span>', axis=1)
+    st.markdown(df.to_html(escape=False, index=False), unsafe_allow_html=True)
