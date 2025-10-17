@@ -4,6 +4,7 @@ import pytesseract
 import numpy as np
 from PIL import Image
 import pandas as pd
+import re
 
 def extract_greeks(image):
     img_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
@@ -30,6 +31,17 @@ def extract_greeks(image):
             greeks['vega'] = float(last_part)
         elif 'impvol' in line and last_part.replace('.', '').replace('-', '').isdigit():
             greeks['impvol'] = float(last_part)
+    return greeks
+
+def parse_text_greeks(text):
+    greeks = {}
+    lines = text.strip().split('\n')
+    for line in lines:
+        match = re.match(r'(\w+)\s+(-?\d+\.\d+)', line)
+        if match:
+            greek, value = match.groups()
+            if greek.lower() in ['delta', 'gamma', 'rho', 'theta', 'vega', 'impvol']:
+                greeks[greek.lower()] = float(value)
     return greeks
 
 def analyze_option(greeks):
@@ -64,25 +76,22 @@ def op_function():
         else:
             st.write("No valid Greek values extracted. Please try a clearer image or use manual input.")
     
-    # Option 2: Manual Input
-    st.write("OR enter Greek values manually:")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        delta = st.number_input("Delta", value=0.0000, step=0.0001, format="%.4f")
-        gamma = st.number_input("Gamma", value=0.0000, step=0.0001, format="%.4f")
-    with col2:
-        rho = st.number_input("Rho", value=0.0000, step=0.0001, format="%.4f")
-        theta = st.number_input("Theta", value=0.0000, step=0.0001, format="%.4f")
-    with col3:
-        vega = st.number_input("Vega", value=0.0000, step=0.0001, format="%.4f")
-        impvol = st.number_input("Impvol", value=0.0000, step=0.0001, format="%.4f")
+    # Option 2: Text Area Input
+    st.write("OR paste Greek values manually in the format (e.g., 'Delta 0.75502\nGamma 0.00663\n...'):")
+    text_input = st.text_area("Enter Greek values", height=200)
     
-    if st.button("Analyze Manual Input"):
-        manual_greeks = {'delta': delta, 'gamma': gamma, 'rho': rho, 'theta': theta, 'vega': vega, 'impvol': impvol}
-        st.write("Entered Greeks:", manual_greeks)
-        call_rec, put_rec = analyze_option(manual_greeks)
-        st.write("Call Option Recommendation:", call_rec)
-        st.write("Put Option Recommendation:", put_rec)
+    if st.button("Analyze Text Input"):
+        if text_input:
+            greeks = parse_text_greeks(text_input)
+            st.write("Parsed Greeks:", greeks)
+            if greeks:
+                call_rec, put_rec = analyze_option(greeks)
+                st.write("Call Option Recommendation:", call_rec)
+                st.write("Put Option Recommendation:", put_rec)
+            else:
+                st.write("No valid Greek values parsed. Please check the format.")
+        else:
+            st.write("Please enter Greek values in the text area.")
 
     # Suggestions
     st.write("### Suggestions")
@@ -100,13 +109,13 @@ def op_function():
     }
     df = pd.DataFrame(data)
 
-    # Update values if manual input is analyzed
-    if 'manual_greeks' in locals():
-        df.loc[df["Greek"] == "Delta", "Value"] = manual_greeks.get('delta', 0.0000)
-        df.loc[df["Greek"] == "Theta", "Value"] = manual_greeks.get('theta', 0.0000)
-        df.loc[df["Greek"] == "Vega", "Value"] = manual_greeks.get('vega', 0.0000)
-        df.loc[df["Greek"] == "Impvol", "Value"] = manual_greeks.get('impvol', 0.0000)
-    elif greeks:  # Update with extracted values if image is processed
+    # Update values if text input is analyzed or image is processed
+    if 'greeks' in locals() and greeks:
+        df.loc[df["Greek"] == "Delta", "Value"] = greeks.get('delta', 0.0000)
+        df.loc[df["Greek"] == "Theta", "Value"] = greeks.get('theta', 0.0000)
+        df.loc[df["Greek"] == "Vega", "Value"] = greeks.get('vega', 0.0000)
+        df.loc[df["Greek"] == "Impvol", "Value"] = greeks.get('impvol', 0.0000)
+    elif 'greeks' in locals() and text_input:
         df.loc[df["Greek"] == "Delta", "Value"] = greeks.get('delta', 0.0000)
         df.loc[df["Greek"] == "Theta", "Value"] = greeks.get('theta', 0.0000)
         df.loc[df["Greek"] == "Vega", "Value"] = greeks.get('vega', 0.0000)
