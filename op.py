@@ -5,10 +5,22 @@ import numpy as np
 from PIL import Image
 
 def extract_greeks(image):
+    # Convert PIL image to OpenCV format
     img_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    # Debugging: Display original image
+    st.image(img_cv, caption="Original Image (Debug)", channels="BGR", use_column_width=True)
+    
+    # Preprocessing
     gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
+    # Apply adaptive thresholding for better text detection
+    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+    # Debugging: Display thresholded image
+    st.image(thresh, caption="Thresholded Image (Debug)", use_column_width=True)
+    
+    # Extract text using OCR
     text = pytesseract.image_to_string(thresh).lower()
+    st.write("Extracted Text (Debug):", text)  # Debugging output
+    
     greeks = {}
     lines = text.split('\n')
     for line in lines:
@@ -31,14 +43,12 @@ def extract_greeks(image):
     return greeks
 
 def analyze_option(greeks):
-    # Call option analysis
     call_recommendation = ""
     if (greeks.get('delta', 0) > 0.3 and greeks.get('theta', 0) > -0.5 and greeks.get('vega', 0) > 0.2):
         call_recommendation = "Consider buying a Call option. Positive Delta, manageable Theta decay, and good Vega suggest potential profit."
     else:
         call_recommendation = "Avoid buying a Call option. The Greek values indicate high risk or low profitability."
 
-    # Put option analysis (Delta is negative for puts, adjust logic)
     put_recommendation = ""
     if (greeks.get('delta', 0) < -0.3 and greeks.get('theta', 0) > -0.5 and greeks.get('vega', 0) > 0.2):
         put_recommendation = "Consider buying a Put option. Negative Delta, manageable Theta decay, and good Vega suggest potential profit."
