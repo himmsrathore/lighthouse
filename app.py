@@ -8,6 +8,7 @@ import urllib.parse
 # Get query parameter
 query_params = st.query_params
 page = query_params.get("page", ["main"])[0].lower()
+st.write(f"Debug: Current page = {page}")  # Debugging output
 
 # Set the page title based on the function
 if page == "main":
@@ -20,6 +21,10 @@ elif page == "op":
     st.title("Op Function")
 elif page == "dhurandhar":
     st.title("Dhurandhar Function")
+else:
+    st.title("Unknown Page")
+    st.write("Please use a valid page link (e.g., ?page=hawk).")
+    st.write("[Back to Main](?) (Open in new tab)")
 
 # Main page with buttons to open new tabs
 if page == "main":
@@ -45,5 +50,5 @@ elif page == "dhurandhar":
     dhurandhar_function()
 
 # Add a back link to return to the main page
-if page != "main":
-    st.write("[Back to Main](?page=main) (Open in new tab)")
+if page != "main" and page in ["whale", "hawk", "op", "dhurandhar"]:
+    st.write("[Back to Main](?) (Open in new tab)")
