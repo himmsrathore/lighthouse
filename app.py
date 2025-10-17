@@ -7,7 +7,7 @@ import urllib.parse
 
 # Get query parameter
 query_params = st.query_params
-page = query_params.get("page", ["main"])[0].lower()
+page = query_params.get("page", "main").lower()  # Use string default directly
 st.write(f"Debug: Raw query_params = {query_params}, Parsed page = {page}")  # Enhanced debugging
 
 # Set the page title based on the function
@@ -31,11 +31,11 @@ if page == "main":
     st.header("Choose an Action")
     col1, col2 = st.columns(2)
     with col1:
-        st.write("[Whale](?page=whale) (Open in new tab)")
-        st.write("[Hawk](?page=hawk) (Open in new tab)")
+        st.write(f"[Whale]({urllib.parse.quote('?page=whale')}) (Open in new tab)")
+        st.write(f"[Hawk]({urllib.parse.quote('?page=hawk')}) (Open in new tab)")
     with col2:
-        st.write("[Op](?page=op) (Open in new tab)")
-        st.write("[Dhurandhar](?page=dhurandhar) (Open in new tab)")
+        st.write(f"[Op]({urllib.parse.quote('?page=op')}) (Open in new tab)")
+        st.write(f"[Dhurandhar]({urllib.parse.quote('?page=dhurandhar')}) (Open in new tab)")
 
     st.write("Click the links above to open each function in a new tab.")
 
