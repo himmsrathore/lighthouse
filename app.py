@@ -35,3 +35,11 @@ if st.session_state.page == 'op_screen':
     if st.button("Back"):
         st.session_state.page = 'main'
     op_function()
+
+    # Hawk screen
+if st.session_state.page == 'hawk_screen':
+    st.title("News Sentiment Analysis (Hawk)")
+    if st.button("Back"):
+        st.session_state.page = 'main'
+    hawk_function()
+    
