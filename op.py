@@ -68,14 +68,14 @@ def op_function():
     st.write("OR enter Greek values manually:")
     col1, col2, col3 = st.columns(3)
     with col1:
-        delta = st.number_input("Delta", value=0.0, step=0.01)
-        gamma = st.number_input("Gamma", value=0.0, step=0.001)
+        delta = st.number_input("Delta", value=0.0000, step=0.0001, format="%.4f")
+        gamma = st.number_input("Gamma", value=0.0000, step=0.0001, format="%.4f")
     with col2:
-        rho = st.number_input("Rho", value=0.0, step=0.01)
-        theta = st.number_input("Theta", value=0.0, step=0.01)
+        rho = st.number_input("Rho", value=0.0000, step=0.0001, format="%.4f")
+        theta = st.number_input("Theta", value=0.0000, step=0.0001, format="%.4f")
     with col3:
-        vega = st.number_input("Vega", value=0.0, step=0.01)
-        impvol = st.number_input("Impvol", value=0.0, step=0.01)
+        vega = st.number_input("Vega", value=0.0000, step=0.0001, format="%.4f")
+        impvol = st.number_input("Impvol", value=0.0000, step=0.0001, format="%.4f")
     
     if st.button("Analyze Manual Input"):
         manual_greeks = {'delta': delta, 'gamma': gamma, 'rho': rho, 'theta': theta, 'vega': vega, 'impvol': impvol}
@@ -96,21 +96,21 @@ def op_function():
     data = {
         "Greek": ["Delta", "Theta", "Vega", "Impvol"],
         "Perfect Range": ["> 0.3", "> -0.5", "> 0.2", "< 0.7"],
-        "Value": [0.0, 0.0, 0.0, 0.0]  # Placeholder, will be updated with input if available
+        "Value": [0.0000, 0.0000, 0.0000, 0.0000]  # Placeholder, will be updated with input if available
     }
     df = pd.DataFrame(data)
 
     # Update values if manual input is analyzed
     if 'manual_greeks' in locals():
-        df.loc[df["Greek"] == "Delta", "Value"] = manual_greeks.get('delta', 0.0)
-        df.loc[df["Greek"] == "Theta", "Value"] = manual_greeks.get('theta', 0.0)
-        df.loc[df["Greek"] == "Vega", "Value"] = manual_greeks.get('vega', 0.0)
-        df.loc[df["Greek"] == "Impvol", "Value"] = manual_greeks.get('impvol', 0.0)
+        df.loc[df["Greek"] == "Delta", "Value"] = manual_greeks.get('delta', 0.0000)
+        df.loc[df["Greek"] == "Theta", "Value"] = manual_greeks.get('theta', 0.0000)
+        df.loc[df["Greek"] == "Vega", "Value"] = manual_greeks.get('vega', 0.0000)
+        df.loc[df["Greek"] == "Impvol", "Value"] = manual_greeks.get('impvol', 0.0000)
     elif greeks:  # Update with extracted values if image is processed
-        df.loc[df["Greek"] == "Delta", "Value"] = greeks.get('delta', 0.0)
-        df.loc[df["Greek"] == "Theta", "Value"] = greeks.get('theta', 0.0)
-        df.loc[df["Greek"] == "Vega", "Value"] = greeks.get('vega', 0.0)
-        df.loc[df["Greek"] == "Impvol", "Value"] = greeks.get('impvol', 0.0)
+        df.loc[df["Greek"] == "Delta", "Value"] = greeks.get('delta', 0.0000)
+        df.loc[df["Greek"] == "Theta", "Value"] = greeks.get('theta', 0.0000)
+        df.loc[df["Greek"] == "Vega", "Value"] = greeks.get('vega', 0.0000)
+        df.loc[df["Greek"] == "Impvol", "Value"] = greeks.get('impvol', 0.0000)
 
     # Define color conditions for bars
     def get_bar_color(value, greek):
