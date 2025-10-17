@@ -46,4 +46,4 @@ elif page == "dhurandhar":
 
 # Add a back link to return to the main page
 if page != "main":
-    st.write("[Back to Main](?) (Open in new tab)")
+    st.write("[Back to Main](?page=main) (Open in new tab)")
